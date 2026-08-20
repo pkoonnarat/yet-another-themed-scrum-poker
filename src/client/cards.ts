@@ -15,7 +15,7 @@ export const COLOR_DEEP: Record<Color, string> = {
   blue: "#2559a8",
 };
 
-const SPECIAL: Record<string, string> = { coffee: "☕", question: "?" };
+const SPECIAL: Record<string, string> = { question: "?" };
 
 /**
  * The rank glyph as a DOM node. The half card is rendered as an explicit
@@ -46,6 +46,18 @@ export function createCardFace(
     dataset: { color, suit, value: card.id },
     style: { "--suit": COLOR_HEX[color], "--deep": COLOR_DEEP[color] } as Partial<CSSStyleDeclaration>,
   });
+
+  if (card.id === "joker") {
+    root.classList.add("is-joker");
+    root.append(
+      el("span", { class: "joker-word tl", text: "JOKER" }),
+      el("span", { class: "joker-face" }, [
+        el("span", { class: "joker-hat", text: "🃏" }),
+      ]),
+      el("span", { class: "joker-word br", text: "JOKER" }),
+    );
+    return root;
+  }
 
   if (special) {
     root.append(

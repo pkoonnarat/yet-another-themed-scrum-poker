@@ -855,7 +855,7 @@ export class RoomView {
         el("li", { html: "Drag a card up onto the table — or tap it — to cast your estimate." }),
         el("li", { html: "Everyone's card stays <b>face-down</b> until someone hits <b>Reveal Cards</b>." }),
         el("li", { html: "Matching cards <b>combo</b> like a poker hand. All-agree = <b>Consensus!</b>" }),
-        el("li", { html: "<b>Story Point</b> is the average of numeric votes (☕ and ? abstain)." }),
+        el("li", { html: "<b>Story Point</b> is the average of numeric votes (Joker and ? abstain)." }),
         el("li", { html: "Hit <b>Clear Cards</b> to start the next round." }),
       ]),
       el("div", { class: "howto-foot", text: "Anyone can reveal or clear. Share the room code to invite others." }),

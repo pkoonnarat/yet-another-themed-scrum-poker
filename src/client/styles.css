@@ -126,10 +126,10 @@ body.crt-off .crt-overlay {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.008 0.012' numOctaves='4' seed='11'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.09 0 0 0 0 0.45 0 0 0 0 0.28 0 0 0 0.75 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
-  background-size: 55% 55%;
-  opacity: 0.4;
-  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.009' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  background-size: 70% 70%;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
   pointer-events: none;
 }
 .landing > * {
@@ -672,28 +672,32 @@ body.crt-off .crt-overlay {
   flex: 1;
   overflow: hidden;
   background:
-    radial-gradient(90% 70% at 50% 32%, var(--felt-1), transparent 62%),
-    radial-gradient(130% 120% at 50% 125%, var(--felt-3), transparent 60%),
+    radial-gradient(60% 48% at 50% 32%, rgba(255, 255, 255, 0.08), transparent 62%),
+    radial-gradient(100% 78% at 50% 24%, var(--felt-1), transparent 62%),
+    radial-gradient(135% 125% at 50% 130%, var(--felt-3), transparent 62%),
     var(--felt-2);
 }
-/* Flowing marble texture (SVG fractal noise), Balatro-style. */
+/* Flowing marble swirl (grayscale fractal noise blended over the green). */
 .table::before {
   content: "";
   position: absolute;
-  inset: -40%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.008 0.012' numOctaves='4' seed='11'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.09 0 0 0 0 0.45 0 0 0 0 0.28 0 0 0 0.75 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
-  background-size: 45% 45%;
-  opacity: 0.5;
-  mix-blend-mode: soft-light;
-  animation: feltSwirl 70s linear infinite alternate;
+  inset: -45%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.009' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  background-size: 62% 62%;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  animation: feltSwirl 80s linear infinite alternate;
   pointer-events: none;
 }
-/* soft light glow bloom in the middle of the felt */
+/* Fine felt grain (fabric texture). */
 .table::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(60% 45% at 50% 34%, rgba(255, 255, 255, 0.1), transparent 70%);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 150px 150px;
+  opacity: 0.09;
+  mix-blend-mode: overlay;
   pointer-events: none;
 }
 .table.shaking {
@@ -1029,6 +1033,42 @@ body.crt-off .crt-overlay {
 .pip-center.special {
   font-size: 40px;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+/* Joker card — classic look: vertical "JOKER" + a jester in the middle */
+.is-joker {
+  background: linear-gradient(158deg, #fffdf6, #ece2cc);
+}
+.joker-word {
+  position: absolute;
+  writing-mode: vertical-rl;
+  font-family: var(--card-font);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--suit, #333);
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+.joker-word.tl {
+  top: 7px;
+  left: 4px;
+}
+.joker-word.br {
+  bottom: 7px;
+  right: 4px;
+  transform: rotate(180deg);
+}
+.joker-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+}
+.joker-hat {
+  font-size: 50px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
 }
 
 /* Card back */

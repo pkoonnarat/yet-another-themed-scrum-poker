@@ -16,14 +16,14 @@ export type CardId =
   | "20"
   | "40"
   | "100"
-  | "coffee"
+  | "joker"
   | "question";
 
 export interface DeckCard {
   id: CardId;
   /** Big glyph shown on the card face. */
   label: string;
-  /** Numeric weight for averaging, or null for abstain cards (☕ / ?). */
+  /** Numeric weight for averaging, or null for abstain cards (Joker / ?). */
   numeric: number | null;
 }
 
@@ -40,7 +40,7 @@ export const DECK: DeckCard[] = [
   { id: "20", label: "20", numeric: 20 },
   { id: "40", label: "40", numeric: 40 },
   { id: "100", label: "100", numeric: 100 },
-  { id: "coffee", label: "☕", numeric: null },
+  { id: "joker", label: "JOKER", numeric: null },
   { id: "question", label: "?", numeric: null },
 ];
 
