@@ -20,10 +20,10 @@ function boot(): void {
   }
   const code = parseCode(location.pathname);
   if (code) {
-    document.title = `Room ${code} · Story Poker`;
+    document.title = `Room ${code} · Scrumlatro`;
     room = new RoomView(app, code);
   } else {
-    document.title = "Story Poker";
+    document.title = "Scrumlatro";
     renderLanding(app, (c) => {
       history.pushState({}, "", `/room/${c}`);
       boot();

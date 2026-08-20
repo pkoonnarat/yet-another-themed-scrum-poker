@@ -1,4 +1,4 @@
-# Story Poker — a Balatro-themed scrum poker 🃏
+# Scrumlatro — a Balatro-themed scrum poker 🃏
 
 A no-login, real-time **planning poker** web app skinned to look, feel, sound and
 animate like the game **Balatro** — pixel-art cards on a green felt table, chunky
