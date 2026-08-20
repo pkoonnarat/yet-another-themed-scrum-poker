@@ -17,6 +17,22 @@ export const COLOR_DEEP: Record<Color, string> = {
 
 const SPECIAL: Record<string, string> = { coffee: "☕", question: "?" };
 
+/**
+ * The rank glyph as a DOM node. The half card is rendered as an explicit
+ * "1/2" fraction so it never depends on a font's ½ glyph (which pixel fonts
+ * mangle into things like "1/8").
+ */
+function rankNode(card: DeckCard): HTMLElement {
+  if (card.id === "0.5") {
+    return el("span", { class: "rank frac" }, [
+      el("span", { class: "fnum", text: "1" }),
+      el("span", { class: "fbar", text: "/" }),
+      el("span", { class: "fden", text: "2" }),
+    ]);
+  }
+  return el("span", { class: "rank", text: card.label });
+}
+
 /** A face-up playing card themed to a player's suit + colour. */
 export function createCardFace(
   card: DeckCard,
@@ -33,9 +49,9 @@ export function createCardFace(
 
   if (special) {
     root.append(
-      el("span", { class: "corner tl", text: special }),
+      el("span", { class: "corner tl special-corner", text: special }),
       el("span", { class: "pip-center special", text: special }),
-      el("span", { class: "corner br", text: special }),
+      el("span", { class: "corner br special-corner", text: special }),
     );
     root.classList.add("is-special");
     return root;
@@ -43,13 +59,13 @@ export function createCardFace(
 
   const corner = (pos: string) =>
     el("span", { class: `corner ${pos}` }, [
-      el("span", { class: "rank", text: card.label }),
+      rankNode(card),
       el("span", { class: "suit", text: glyph }),
     ]);
 
   root.append(
     corner("tl"),
-    el("span", { class: "pip-center", text: card.label }),
+    el("span", { class: "pip-center" }, [rankNode(card)]),
     el("span", { class: "pip-suit", text: glyph }),
     corner("br"),
   );

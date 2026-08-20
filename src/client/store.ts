@@ -73,3 +73,17 @@ export function getSoundOn(): boolean {
 export function setSoundOn(on: boolean): void {
   localStorage.setItem("sp_sound", on ? "on" : "off");
 }
+
+export function getCrtOn(): boolean {
+  return localStorage.getItem("sp_crt") !== "off";
+}
+
+export function setCrtOn(on: boolean): void {
+  localStorage.setItem("sp_crt", on ? "on" : "off");
+  document.body.classList.toggle("crt-off", !on);
+}
+
+/** Apply the persisted CRT preference to <body>. Call once on boot. */
+export function applyCrt(): void {
+  document.body.classList.toggle("crt-off", !getCrtOn());
+}

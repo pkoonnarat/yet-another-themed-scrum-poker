@@ -1,6 +1,9 @@
 import "./styles.css";
 import { renderLanding } from "./landing";
 import { RoomView } from "./room";
+import { applyCrt } from "./store";
+
+applyCrt();
 
 const app = document.getElementById("app") as HTMLElement;
 let room: RoomView | null = null;

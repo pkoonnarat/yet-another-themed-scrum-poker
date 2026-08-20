@@ -3,24 +3,32 @@
    ========================================================================= */
 :root {
   --font: "Pixelify Sans", ui-monospace, "Courier New", monospace;
-  --felt-1: #1c7a4a;
-  --felt-2: #0f5130;
-  --felt-3: #0b3d24;
-  --panel: #34333d;
-  --panel-2: #3f3e49;
-  --panel-inset: #26252d;
-  --panel-line: #55545f;
-  --ink: #f3efe6;
-  --ink-dim: #b9b6c2;
-  --gold: #f0c14b;
+  --card-font: "Silkscreen", "Pixelify Sans", monospace;
+  /* Balatro felt greens */
+  --felt-1: #45ab72;
+  --felt-2: #27895a;
+  --felt-3: #12482c;
+  /* Warm charcoal panels */
+  --panel: #2c2b30;
+  --panel-2: #37363c;
+  --panel-inset: #1a191d;
+  --panel-line: #4c4a54;
+  --ink: #efe7d4;
+  --ink-dim: #a9a394;
+  /* accents */
+  --gold: #efb61c;
+  --gold-2: #c8901a;
+  --gold-ink: #43320a;
   --red: #fe5f55;
-  --red-deep: #c53b33;
-  --blue: #4b9fea;
-  --blue-deep: #2f6fbf;
+  --red-deep: #cf3f37;
+  --blue: #3f92da;
+  --blue-deep: #2a6cb0;
+  --orange: #ef9b2b;
+  --orange-deep: #cf7d13;
   --green: #58c07a;
   --green-deep: #2f8b4f;
-  --chip: #59a5f0;
-  --shadow: rgba(0, 0, 0, 0.45);
+  --chip: #6ab6f5;
+  --shadow: rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -51,8 +59,55 @@ input {
   font-family: var(--font);
 }
 
+/* ======================= CRT SHADER OVERLAY ============================= */
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  mix-blend-mode: normal;
+}
+/* scanlines + faint RGB scan */
+.crt-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.22) 0,
+      rgba(0, 0, 0, 0.22) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.05) 0,
+      rgba(0, 255, 0, 0.03) 1px,
+      rgba(0, 0, 255, 0.05) 2px,
+      transparent 3px
+    );
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+/* vignette + curvature + rolling flicker */
+.crt-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 130% at 50% 50%, transparent 52%, rgba(0, 0, 0, 0.28) 82%, rgba(0, 0, 0, 0.6) 100%),
+    linear-gradient(rgba(18, 30, 22, 0.05), rgba(18, 30, 22, 0.05));
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.55), inset 0 0 30px rgba(0, 0, 0, 0.4);
+  animation: crtFlicker 7s steps(60) infinite;
+}
+body.crt-off .crt-overlay {
+  display: none;
+}
+
 /* ======================= LANDING ======================================== */
 .landing {
+  position: relative;
   height: 100%;
   overflow-y: auto;
   display: flex;
@@ -62,9 +117,24 @@ input {
   gap: 22px;
   padding: 32px 20px;
   background:
-    radial-gradient(120% 90% at 50% -10%, var(--felt-1), transparent 60%),
-    radial-gradient(140% 120% at 50% 120%, var(--felt-3), transparent 55%),
+    radial-gradient(110% 80% at 50% 20%, var(--felt-1), transparent 62%),
+    radial-gradient(140% 120% at 50% 120%, var(--felt-3), transparent 58%),
     var(--felt-2);
+}
+.landing::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.008 0.012' numOctaves='4' seed='11'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.09 0 0 0 0 0.45 0 0 0 0 0.28 0 0 0 0.75 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
+  background-size: 55% 55%;
+  opacity: 0.4;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+.landing > * {
+  position: relative;
+  z-index: 1;
 }
 .landing-header {
   text-align: center;
@@ -278,34 +348,48 @@ input {
   height: 100%;
 }
 .sidebar {
-  width: 320px;
+  width: 316px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #2b2a33, #242229);
-  border-right: 3px solid #17161c;
-  padding: 14px;
+  background: linear-gradient(180deg, #17161a, #100f12);
+  border-right: 4px solid #000;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 11px;
   overflow-y: auto;
 }
 .panel {
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
-  border-radius: 14px;
-  box-shadow: inset 0 0 0 2px var(--panel-line), 0 5px 0 #1c1b22;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.06), 0 4px 0 #0a0a0c;
   padding: 12px 14px;
 }
 
-/* Blind / identity panel */
+/* Blind / identity panel — gold header bar + dark body (matches Balatro) */
 .blind-panel {
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+}
+.blind-panel:hover {
+  filter: brightness(1.06);
+}
+.blind-header {
+  background: linear-gradient(180deg, #ffd23c, var(--gold-2));
+  color: var(--gold-ink);
+  font-size: 23px;
+  font-weight: 700;
+  text-align: center;
+  padding: 5px 10px 7px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.16);
+}
+.blind-body {
   display: flex;
   align-items: center;
   gap: 12px;
-  cursor: pointer;
-  background: linear-gradient(180deg, #6a5320, #4a3915);
-  box-shadow: inset 0 0 0 2px #86682c, 0 5px 0 #2c2110;
-}
-.blind-panel:hover {
-  filter: brightness(1.05);
+  padding: 12px 14px;
 }
 .id-token {
   width: 54px;
@@ -353,14 +437,12 @@ input {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(180deg, #24344a, #1a2636);
-  box-shadow: inset 0 0 0 2px #33506f, 0 5px 0 #101822;
 }
 .score-label {
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1;
   white-space: pre-line;
-  color: #cfe0f2;
+  color: var(--ink);
   letter-spacing: 0.5px;
 }
 .score-figure {
@@ -368,15 +450,17 @@ input {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: 10px;
+  background: #0d1a2e;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 2px #24304a, inset 0 2px 6px rgba(0, 0, 0, 0.6);
   padding: 6px 14px;
-  min-width: 96px;
+  min-width: 100px;
   justify-content: center;
 }
 .chip-star {
   color: var(--chip);
   font-size: 20px;
+  text-shadow: 0 0 6px rgba(106, 182, 245, 0.6);
 }
 .score-value {
   font-size: 34px;
@@ -416,29 +500,34 @@ input {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: 6px;
-  font-size: 30px;
+  gap: 7px;
+  font-size: 34px;
   font-weight: 700;
 }
 .hp-chips {
-  background: linear-gradient(180deg, #2b6fbf, #1f4f8f);
+  flex: 1;
+  text-align: right;
+  background: linear-gradient(180deg, #4f9fe6, var(--blue-deep));
   color: #fff;
   border-radius: 8px;
-  padding: 4px 16px;
-  min-width: 64px;
-  box-shadow: inset 0 0 0 2px #5b9be0;
+  padding: 3px 16px;
+  box-shadow: inset 0 0 0 2px #7cbcf5, inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 3px 0 rgba(0, 0, 0, 0.35);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
 }
 .hp-x {
   color: var(--red);
   align-self: center;
+  font-size: 26px;
 }
 .hp-mult {
-  background: linear-gradient(180deg, #e5484d, #b3352f);
+  flex: 1;
+  text-align: left;
+  background: linear-gradient(180deg, #ff7069, var(--red-deep));
   color: #fff;
   border-radius: 8px;
-  padding: 4px 16px;
-  min-width: 64px;
-  box-shadow: inset 0 0 0 2px #ff8078;
+  padding: 3px 16px;
+  box-shadow: inset 0 0 0 2px #ff938c, inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 3px 0 rgba(0, 0, 0, 0.35);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
 }
 
 /* Controls */
@@ -537,7 +626,7 @@ input {
 .round-num {
   font-size: 28px;
   font-weight: 700;
-  color: var(--gold);
+  color: var(--orange);
 }
 .code-chip {
   margin-top: auto;
@@ -583,10 +672,29 @@ input {
   flex: 1;
   overflow: hidden;
   background:
-    radial-gradient(90% 60% at 50% 34%, rgba(255, 255, 255, 0.08), transparent 60%),
-    radial-gradient(120% 90% at 50% 120%, var(--felt-3), transparent 55%),
-    radial-gradient(140% 120% at 50% -20%, var(--felt-1), transparent 55%),
+    radial-gradient(90% 70% at 50% 32%, var(--felt-1), transparent 62%),
+    radial-gradient(130% 120% at 50% 125%, var(--felt-3), transparent 60%),
     var(--felt-2);
+}
+/* Flowing marble texture (SVG fractal noise), Balatro-style. */
+.table::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.008 0.012' numOctaves='4' seed='11'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.09 0 0 0 0 0.45 0 0 0 0 0.28 0 0 0 0.75 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
+  background-size: 45% 45%;
+  opacity: 0.5;
+  mix-blend-mode: soft-light;
+  animation: feltSwirl 70s linear infinite alternate;
+  pointer-events: none;
+}
+/* soft light glow bloom in the middle of the felt */
+.table::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 45% at 50% 34%, rgba(255, 255, 255, 0.1), transparent 70%);
+  pointer-events: none;
 }
 .table.shaking {
   animation: shake 0.28s ease;
@@ -833,33 +941,39 @@ input {
 .card {
   width: 78px;
   height: 108px;
-  border-radius: 9px;
-  background: linear-gradient(160deg, #fffdf6, #efe9d8);
-  box-shadow: 0 4px 8px var(--shadow), inset 0 0 0 2px rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  background: linear-gradient(158deg, #fdfaf0 0%, #efe7d2 100%);
+  box-shadow: 0 4px 7px var(--shadow), inset 0 0 0 2px rgba(255, 255, 255, 0.7),
+    inset 0 0 0 3px rgba(0, 0, 0, 0.28);
   position: relative;
   overflow: hidden;
   user-select: none;
   color: var(--suit, #333);
+}
+.card .rank {
+  font-family: var(--card-font);
+  font-weight: 700;
+  letter-spacing: 0;
 }
 .card-face .corner {
   position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
-  line-height: 0.9;
-  font-weight: 700;
+  line-height: 0.85;
+  gap: 1px;
 }
 .card-face .corner.tl {
-  top: 5px;
+  top: 6px;
   left: 6px;
 }
 .card-face .corner.br {
-  bottom: 5px;
+  bottom: 6px;
   right: 6px;
   transform: rotate(180deg);
 }
 .card-face .corner .rank {
-  font-size: 16px;
+  font-size: 14px;
 }
 .card-face .corner .suit {
   font-size: 13px;
@@ -869,25 +983,48 @@ input {
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 34px;
-  font-weight: 700;
   z-index: 2;
+}
+.pip-center .rank {
+  font-size: 33px;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
 }
 .pip-suit {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 60px;
-  opacity: 0.12;
+  font-size: 62px;
+  opacity: 0.1;
   z-index: 1;
 }
+/* ½ card rendered as an explicit diagonal fraction */
+.frac {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+.frac .fnum {
+  align-self: flex-start;
+  font-size: 0.66em;
+}
+.frac .fbar {
+  font-size: 0.9em;
+  margin: 0 -0.04em;
+}
+.frac .fden {
+  align-self: flex-end;
+  font-size: 0.66em;
+}
 .card-face.is-special {
-  background: linear-gradient(160deg, #2a2833, #191821);
+  background: linear-gradient(158deg, #2a2833, #191821);
   color: #fff;
+  box-shadow: 0 4px 7px var(--shadow), inset 0 0 0 2px rgba(255, 255, 255, 0.18),
+    inset 0 0 0 3px rgba(0, 0, 0, 0.4);
 }
 .card-face.is-special .corner {
-  font-size: 14px;
+  font-size: 13px;
+  font-family: var(--card-font);
 }
 .pip-center.special {
   font-size: 40px;
@@ -1219,6 +1356,16 @@ input {
 @keyframes modalIn {
   from { transform: scale(0.85); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+@keyframes crtFlicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.94; }
+  52% { opacity: 0.99; }
+  54% { opacity: 0.93; }
+}
+@keyframes feltSwirl {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1.25); }
+  100% { transform: translate(-5%, -3%) rotate(9deg) scale(1.35); }
 }
 
 /* ======================= RESPONSIVE =================================== */

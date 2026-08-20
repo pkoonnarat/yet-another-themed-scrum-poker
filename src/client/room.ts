@@ -10,7 +10,7 @@ import {
 } from "@shared/protocol";
 import { clear, el, mount, wait } from "./dom";
 import { Net } from "./net";
-import { getName, setName } from "./store";
+import { getCrtOn, getName, setCrtOn, setName } from "./store";
 import { COLOR_HEX, createCardBack, createCardFace, fanSlot } from "./cards";
 import {
   isSoundOn,
@@ -109,11 +109,14 @@ export class RoomView {
         on: { click: () => this.editName() },
       },
       [
-        this.idToken,
-        el("div", { class: "id-meta" }, [
-          el("div", { class: "id-eyebrow", text: "BIG BLIND" }),
-          this.idName,
-          this.idSub,
+        el("div", { class: "blind-header", text: "Big Blind" }),
+        el("div", { class: "blind-body" }, [
+          this.idToken,
+          el("div", { class: "id-meta" }, [
+            el("div", { class: "id-eyebrow", text: "YOU" }),
+            this.idName,
+            this.idSub,
+          ]),
         ]),
       ],
     );
@@ -819,6 +822,17 @@ export class RoomView {
         },
       },
     });
+    const crtRow = el("button", {
+      class: "opt-row",
+      text: `CRT filter: ${getCrtOn() ? "ON" : "OFF"}`,
+      on: {
+        click: (e) => {
+          const on = !getCrtOn();
+          setCrtOn(on);
+          (e.currentTarget as HTMLElement).textContent = `CRT filter: ${on ? "ON" : "OFF"}`;
+        },
+      },
+    });
     const renameRow = el("button", {
       class: "opt-row",
       text: "Rename Yourself",
@@ -830,7 +844,7 @@ export class RoomView {
       },
     });
     this.modal("Options", [
-      el("div", { class: "opt-list" }, [soundRow, copyRow, renameRow]),
+      el("div", { class: "opt-list" }, [soundRow, crtRow, copyRow, renameRow]),
       el("div", { class: "opt-code", text: `Room code: ${this.code}` }),
     ]);
   }
