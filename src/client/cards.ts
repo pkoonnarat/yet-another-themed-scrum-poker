@@ -1,5 +1,6 @@
 import { type Color, type DeckCard, type Suit, SUIT_GLYPH } from "@shared/protocol";
 import { el } from "./dom";
+import { spriteEl } from "./pixelart";
 
 export const COLOR_HEX: Record<Color, string> = {
   black: "#33323a",
@@ -51,9 +52,7 @@ export function createCardFace(
     root.classList.add("is-joker");
     root.append(
       el("span", { class: "joker-word tl", text: "JOKER" }),
-      el("span", { class: "joker-face" }, [
-        el("span", { class: "joker-hat", text: "🃏" }),
-      ]),
+      el("span", { class: "joker-face" }, [spriteEl("jester", "jesterPrime")]),
       el("span", { class: "joker-word br", text: "JOKER" }),
     );
     return root;

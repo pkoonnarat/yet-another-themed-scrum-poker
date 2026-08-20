@@ -364,6 +364,17 @@ body.crt-off .crt-overlay {
   box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.06), 0 4px 0 #0a0a0c;
   padding: 12px 14px;
 }
+/* Numeric readouts use the crisp bitmap font so digits (esp. 2/5) stay legible. */
+.score-value,
+.hp-chips,
+.hp-mult,
+.stat-value,
+.money,
+.round-num,
+.code-val,
+.joker-count {
+  font-family: var(--card-font);
+}
 
 /* Blind / identity panel — gold header bar + dark body (matches Balatro) */
 .blind-panel {
@@ -672,32 +683,36 @@ body.crt-off .crt-overlay {
   flex: 1;
   overflow: hidden;
   background:
-    radial-gradient(60% 48% at 50% 32%, rgba(255, 255, 255, 0.08), transparent 62%),
-    radial-gradient(100% 78% at 50% 24%, var(--felt-1), transparent 62%),
-    radial-gradient(135% 125% at 50% 130%, var(--felt-3), transparent 62%),
+    radial-gradient(72% 54% at 50% 28%, rgba(255, 255, 255, 0.12), transparent 60%),
+    radial-gradient(120% 90% at 50% 16%, var(--felt-1), transparent 60%),
+    radial-gradient(150% 130% at 50% 134%, var(--felt-3), transparent 62%),
     var(--felt-2);
 }
-/* Flowing marble swirl (grayscale fractal noise blended over the green). */
+/* Bold flowing marble swirl (big grayscale blobs blended over the green). */
 .table::before {
   content: "";
   position: absolute;
-  inset: -45%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.009' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
-  background-size: 62% 62%;
-  opacity: 0.4;
+  inset: -55%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.005' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
+  background-size: 78% 78%;
+  opacity: 0.72;
   mix-blend-mode: overlay;
-  animation: feltSwirl 80s linear infinite alternate;
+  animation: feltSwirl 90s linear infinite alternate;
   pointer-events: none;
 }
-/* Fine felt grain (fabric texture). */
+/* Medium swirl + fine fabric grain (blended together, drifting slowly). */
 .table::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-  background-size: 150px 150px;
-  opacity: 0.09;
-  mix-blend-mode: overlay;
+  inset: -8%;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.017 0.021' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23d)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 130% 130%, 140px 140px;
+  background-blend-mode: overlay;
+  opacity: 0.3;
+  mix-blend-mode: soft-light;
+  animation: feltDrift 70s linear infinite alternate;
   pointer-events: none;
 }
 .table.shaking {
@@ -744,9 +759,16 @@ body.crt-off .crt-overlay {
   z-index: 20;
   filter: brightness(1.12);
 }
-.joker-emoji {
-  font-size: 30px;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+.joker-art {
+  width: 48px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+}
+.joker-art .pix-sprite {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 3px rgba(120, 200, 255, 0.35)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
 }
 .joker-tip {
   position: absolute;
@@ -1065,10 +1087,14 @@ body.crt-off .crt-overlay {
   place-items: center;
   z-index: 2;
 }
-.joker-hat {
-  font-size: 50px;
-  line-height: 1;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+.pix-sprite {
+  display: block;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+}
+.joker-face .pix-sprite {
+  width: 62%;
+  height: auto;
 }
 
 /* Card back */
@@ -1406,6 +1432,10 @@ body.crt-off .crt-overlay {
 @keyframes feltSwirl {
   0% { transform: translate(0, 0) rotate(0deg) scale(1.25); }
   100% { transform: translate(-5%, -3%) rotate(9deg) scale(1.35); }
+}
+@keyframes feltDrift {
+  0% { background-position: 0% 0%, 0 0; }
+  100% { background-position: 16% 10%, 0 0; }
 }
 
 /* ======================= RESPONSIVE =================================== */

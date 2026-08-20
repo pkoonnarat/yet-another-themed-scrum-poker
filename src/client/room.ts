@@ -12,6 +12,7 @@ import { clear, el, mount, wait } from "./dom";
 import { Net } from "./net";
 import { getCrtOn, getName, setCrtOn, setName } from "./store";
 import { COLOR_HEX, createCardBack, createCardFace, fanSlot } from "./cards";
+import { spriteEl } from "./pixelart";
 import {
   isSoundOn,
   playClear,
@@ -27,11 +28,11 @@ import {
 } from "./sound";
 
 const JOKERS = [
-  { emoji: "🎩", name: "The Facilitator", desc: "Keeps the round moving. Nudges lurkers to vote." },
-  { emoji: "🔥", name: "Deadline", desc: "Cards wobble twice as hard. Ship it anyway." },
-  { emoji: "📈", name: "Scope Creep", desc: "Every estimate is secretly a little bigger." },
-  { emoji: "🦆", name: "Rubber Duck", desc: "Explains the ticket to itself. It helps." },
-  { emoji: "☕", name: "Fuel", desc: "Abstain guilt-free. Refill required." },
+  { sprite: "jester", pal: "jesterPrime", name: "Null Pointer", desc: "Points at a story that doesn't exist yet." },
+  { sprite: "skull", pal: "skullCyber", name: "Kernel Panic", desc: "Everyone re-estimates. Nobody knows why." },
+  { sprite: "jester", pal: "jesterAcid", name: "Race Condition", desc: "Two devs, one number, undefined behaviour." },
+  { sprite: "skull", pal: "skullIce", name: "Stack Overflow", desc: "Pastes the estimate straight from 2013." },
+  { sprite: "jester", pal: "jesterEmber", name: "Rubber Duck", desc: "Quacks your acceptance criteria back at you." },
 ];
 
 interface Seat {
@@ -247,7 +248,7 @@ export class RoomView {
         style: { animationDelay: `${i * 0.3}s` } as Partial<CSSStyleDeclaration>,
         on: { pointerenter: () => isSoundOn() && playHover() },
       },
-      [el("span", { class: "joker-emoji", text: j.emoji }), tip],
+      [el("div", { class: "joker-art" }, [spriteEl(j.sprite, j.pal)]), tip],
     );
   }
 
