@@ -147,8 +147,8 @@ export function renderLanding(
   const header = el("header", { class: "landing-header" }, [
     el("div", { class: "logo-chip", text: "★" }),
     el("h1", { class: "landing-title" }, [
-      el("span", { class: "t-word", text: "STORY" }),
-      el("span", { class: "t-word accent", text: "POKER" }),
+      el("span", { class: "t-word", text: "SCRUM" }),
+      el("span", { class: "t-word accent", text: "LATRO" }),
     ]),
     el("p", { class: "landing-tagline", text: "Planning poker, juiced." }),
   ]);
