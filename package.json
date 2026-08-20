@@ -1,0 +1,22 @@
+{
+  "name": "yet-another-themed-scrum-poker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A Balatro-themed online scrum poker, on Cloudflare Workers + Durable Objects.",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.worker.json",
+    "build": "vite build",
+    "watch": "vite build --watch",
+    "dev": "wrangler dev",
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "check": "npm run typecheck && npm run build"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
+    "wrangler": "^4.0.0"
+  }
+}
