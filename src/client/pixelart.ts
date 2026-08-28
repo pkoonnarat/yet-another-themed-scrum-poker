@@ -17,6 +17,7 @@ export const SPRITES: Record<string, string[]> = {
     ".ommmpppppcccco.",
     ".offffffffffo...",
     ".offeeffeeffo...",
+    ".offeeffeeffo...",
     ".offffffffffo...",
     ".offggggggffo...",
     ".offffffffffo...",
@@ -72,6 +73,17 @@ export const PALETTES: Record<string, Palette> = {
     f: "#2a1010",
     e: "#ffd24b",
     g: "#fff0e0",
+  },
+  // Balatro green-yellow — for the player's hand Joker card.
+  jesterGold: {
+    y: "#ffe14a",
+    o: "#102a12",
+    m: "#3fbf5a",
+    c: "#b6e84a",
+    p: "#ffcf3a",
+    f: "#17421f",
+    e: "#eaff8c",
+    g: "#f4ffd6",
   },
   skullCyber: {
     o: "#0a0a14",

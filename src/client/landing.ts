@@ -1,7 +1,31 @@
 import { el, mount } from "./dom";
 import { createRoom, roomExists } from "./net";
 import { getName, setName } from "./store";
-import { playError, playSelect, unlockAudio } from "./sound";
+import { playError, playSelect, playSparkle, unlockAudio } from "./sound";
+import { rand } from "./dom";
+
+function sparkBurst(node: HTMLElement): void {
+  const r = node.getBoundingClientRect();
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+  for (let i = 0; i < 10; i++) {
+    const s = el("div", { class: "spark", text: rand(["✦", "✳", "★", "♠", "♥", "♦", "♣"]) });
+    s.style.left = `${cx + (Math.random() - 0.5) * 60}px`;
+    s.style.top = `${cy + (Math.random() - 0.5) * 40}px`;
+    s.style.color = rand(["#ffd23c", "#6ab6f5", "#58c07a", "#fe5f55", "#ffffff"]);
+    document.body.append(s);
+    setTimeout(() => s.remove(), 900);
+  }
+  node.animate(
+    [
+      { transform: "rotate(0) scale(1)" },
+      { transform: "rotate(360deg) scale(1.25)" },
+      { transform: "rotate(720deg) scale(1)" },
+    ],
+    { duration: 700, easing: "cubic-bezier(.2,.8,.3,1)" },
+  );
+  playSparkle();
+}
 
 export function renderLanding(
   root: HTMLElement,
@@ -144,8 +168,19 @@ export function renderLanding(
     joinError,
   ]);
 
+  const logo = el("div", {
+    class: "logo-chip",
+    text: "★",
+    title: "Go on, click it",
+    on: {
+      click: () => {
+        unlockAudio();
+        sparkBurst(logo);
+      },
+    },
+  });
   const header = el("header", { class: "landing-header" }, [
-    el("div", { class: "logo-chip", text: "★" }),
+    logo,
     el("h1", { class: "landing-title" }, [
       el("span", { class: "t-word", text: "SCRUM" }),
       el("span", { class: "t-word accent", text: "LATRO" }),
