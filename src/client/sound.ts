@@ -139,3 +139,41 @@ export function playFanfare(): void {
 export function playError(): void {
   tone(200, 0.18, "sawtooth", 0.2, 0, 120);
 }
+
+// --- easter-egg / interaction sounds ---------------------------------------
+
+export function playCoin(): void {
+  tone(988, 0.07, "square", 0.22);
+  tone(1319, 0.16, "square", 0.2, 0.06);
+}
+
+export function playShuffle(): void {
+  for (let i = 0; i < 6; i++) noise(0.05, 0.16, i * 0.05, 2200);
+}
+
+export function playSparkle(): void {
+  const f = 1200 + Math.random() * 900;
+  tone(f, 0.12, "triangle", 0.16, 0, f * 1.8);
+}
+
+/** Ascending "collect" note — pitch rises with the step (0-based). */
+export function playPowerup(step: number): void {
+  const freq = 523.25 * Math.pow(2, Math.min(step, 8) / 12);
+  tone(freq, 0.12, "square", 0.24, 0, freq * 1.4);
+  tone(freq * 2, 0.1, "triangle", 0.1, 0.02);
+}
+
+export function playJackpot(): void {
+  const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5, 1567.98];
+  notes.forEach((n, i) => {
+    tone(n, 0.3, "square", 0.24, i * 0.07);
+    tone(n * 2, 0.24, "triangle", 0.09, i * 0.07);
+  });
+  tone(2093, 0.6, "square", 0.22, notes.length * 0.07);
+  for (let i = 0; i < 3; i++) noise(0.12, 0.14, 0.4 + i * 0.12, 3000);
+}
+
+export function playGlitch(): void {
+  noise(0.12, 0.2, 0, 400);
+  tone(90, 0.14, "sawtooth", 0.16, 0, 200);
+}

@@ -19,8 +19,13 @@
   </head>
   <body>
     <div id="app"></div>
-    <!-- CRT shader overlay (scanlines + vignette + flicker), toggled in Options -->
-    <div class="crt-overlay" aria-hidden="true"></div>
+    <!-- CRT shader overlay (scanlines + vignette + flicker + grain + roll + glitch),
+         toggled in Options -->
+    <div class="crt-overlay" aria-hidden="true">
+      <div class="crt-grain"></div>
+      <div class="crt-scanbar"></div>
+      <div class="crt-static"></div>
+    </div>
     <script type="module" src="/main.ts"></script>
   </body>
 </html>

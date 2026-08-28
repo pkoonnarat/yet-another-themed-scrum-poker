@@ -52,7 +52,7 @@ export function createCardFace(
     root.classList.add("is-joker");
     root.append(
       el("span", { class: "joker-word tl", text: "JOKER" }),
-      el("span", { class: "joker-face" }, [spriteEl("jester", "jesterPrime")]),
+      el("span", { class: "joker-face" }, [spriteEl("jester", "jesterGold")]),
       el("span", { class: "joker-word br", text: "JOKER" }),
     );
     return root;

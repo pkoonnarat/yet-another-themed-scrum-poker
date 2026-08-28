@@ -101,6 +101,48 @@ input {
   box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.55), inset 0 0 30px rgba(0, 0, 0, 0.4);
   animation: crtFlicker 7s steps(60) infinite;
 }
+/* Animated film grain */
+.crt-grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 150px 150px;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  animation: crtGrain 0.5s steps(4) infinite;
+}
+/* Rolling refresh bar */
+.crt-scanbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -24%;
+  height: 24%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(255, 255, 255, 0.05) 44%,
+    rgba(210, 255, 230, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 56%,
+    transparent
+  );
+  mix-blend-mode: screen;
+  animation: crtRoll 8s linear infinite;
+}
+/* Occasional glitch static burst */
+.crt-static {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='13' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: crtStatic 17s steps(1) infinite;
+}
+/* A short, intense glitch pulse the app can trigger (Konami / jackpot). */
+body.glitching .crt-static {
+  animation: crtGlitchBurst 0.5s steps(2) 1;
+}
 body.crt-off .crt-overlay {
   display: none;
 }
@@ -154,6 +196,10 @@ body.crt-off .crt-overlay {
   border-radius: 50%;
   box-shadow: 0 6px 0 #b8901f, 0 10px 18px var(--shadow);
   animation: bob 2.4s ease-in-out infinite;
+  cursor: pointer;
+}
+.logo-chip:active {
+  transform: scale(0.94);
 }
 .landing-title {
   margin: 4px 0 0;
@@ -1056,9 +1102,10 @@ body.crt-off .crt-overlay {
   font-size: 40px;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
 }
-/* Joker card — classic look: vertical "JOKER" + a jester in the middle */
+/* Joker card — classic look: vertical "JOKER" + a jester in the middle.
+   Themed to Balatro green-yellow rather than the player's suit colour. */
 .is-joker {
-  background: linear-gradient(158deg, #fffdf6, #ece2cc);
+  background: linear-gradient(158deg, #fffdf0 0%, #eef0cf 55%, #e4ecbc 100%);
 }
 .joker-word {
   position: absolute;
@@ -1067,9 +1114,9 @@ body.crt-off .crt-overlay {
   font-weight: 700;
   font-size: 11px;
   letter-spacing: 1px;
-  color: var(--suit, #333);
+  color: #6f5410;
   line-height: 1;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 .joker-word.tl {
   top: 7px;
@@ -1429,6 +1476,29 @@ body.crt-off .crt-overlay {
   52% { opacity: 0.99; }
   54% { opacity: 0.93; }
 }
+@keyframes crtGrain {
+  0% { background-position: 0 0; }
+  25% { background-position: -9px 7px; }
+  50% { background-position: 7px -11px; }
+  75% { background-position: -7px -6px; }
+  100% { background-position: 9px 9px; }
+}
+@keyframes crtRoll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(560%); }
+}
+@keyframes crtStatic {
+  0%, 95%, 100% { opacity: 0; }
+  95.4% { opacity: 0.13; background-position: 0 0; }
+  96% { opacity: 0.04; background-position: 34px 12px; }
+  96.5% { opacity: 0.15; background-position: -22px 44px; }
+  97% { opacity: 0; }
+}
+@keyframes crtGlitchBurst {
+  0% { opacity: 0.22; transform: translateX(-2px); }
+  50% { opacity: 0.1; transform: translateX(3px); }
+  100% { opacity: 0; transform: translateX(0); }
+}
 @keyframes feltSwirl {
   0% { transform: translate(0, 0) rotate(0deg) scale(1.25); }
   100% { transform: translate(-5%, -3%) rotate(9deg) scale(1.35); }
@@ -1436,6 +1506,178 @@ body.crt-off .crt-overlay {
 @keyframes feltDrift {
   0% { background-position: 0% 0%, 0 0; }
   100% { background-position: 16% 10%, 0 0; }
+}
+
+/* ======================= INTERACTIVITY & EASTER EGGS ================== */
+.id-token,
+.chip-star,
+.money,
+.deck,
+.round-num,
+.code-val {
+  cursor: pointer;
+}
+.id-token,
+.chip-star,
+.money,
+.round-num {
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+.id-token:hover,
+.chip-star:hover,
+.money:hover,
+.round-num:hover {
+  transform: scale(1.14) rotate(-4deg);
+  filter: brightness(1.15);
+}
+.id-token:active,
+.money:active,
+.chip-star:active {
+  transform: scale(0.92);
+}
+.deck {
+  transition: transform 0.14s ease;
+}
+.deck:hover {
+  transform: translateY(-4px) rotate(-2deg);
+}
+.deck.shuffling {
+  animation: deckCut 0.5s ease;
+}
+
+.jiggly {
+  cursor: default;
+  display: inline-block;
+}
+.jiggly:hover {
+  animation: textJiggle 0.45s ease;
+}
+
+.joker {
+  cursor: pointer;
+}
+.joker.activated {
+  box-shadow: inset 0 0 0 2px var(--gold), 0 0 16px rgba(240, 193, 75, 0.75), 0 5px 0 rgba(0, 0, 0, 0.4);
+  filter: brightness(1.14) saturate(1.15);
+}
+.joker.pop {
+  animation: jokerPop 0.42s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+.joker.jackpot {
+  animation: jokerJackpot 0.85s ease;
+}
+
+body.party .table {
+  animation: partyHue 3.2s linear infinite;
+}
+body.party .hc-inner {
+  animation-duration: 1.1s !important;
+}
+
+.spark {
+  position: fixed;
+  pointer-events: none;
+  z-index: 905;
+  font-size: 20px;
+  transform: translate(-50%, -50%);
+  animation: sparkFloat 0.85s ease forwards;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+}
+.ripple {
+  position: fixed;
+  pointer-events: none;
+  z-index: 904;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: rippleOut 0.6s ease forwards;
+}
+.coin {
+  position: fixed;
+  pointer-events: none;
+  z-index: 906;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe89a, var(--gold));
+  box-shadow: 0 0 0 2px #b8901f, 0 0 10px rgba(240, 193, 75, 0.7);
+  transform: translate(-50%, -50%);
+  animation: coinArc 0.9s ease forwards;
+}
+.riffle-card {
+  position: fixed;
+  pointer-events: none;
+  z-index: 903;
+  width: 30px;
+  height: 42px;
+  border-radius: 5px;
+  background: repeating-linear-gradient(45deg, #b23b3b 0 4px, #8f2c2c 4px 8px);
+  box-shadow: inset 0 0 0 2px #fff, 0 3px 6px var(--shadow);
+  transform: translate(-50%, -50%);
+}
+.wild-banner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  z-index: 62;
+  pointer-events: none;
+}
+.wild-title {
+  font-size: 76px;
+  font-weight: 700;
+  color: var(--gold);
+  text-shadow: 0 6px 0 #6a4a10, 0 0 40px rgba(240, 193, 75, 0.85);
+  animation: consensusIn 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.wild-sub {
+  font-size: 22px;
+  color: #fff;
+  text-shadow: 0 2px 6px #000;
+  animation: consensusIn 0.6s 0.1s both;
+}
+
+@keyframes deckCut {
+  0% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-16px) rotate(-7deg); }
+  55% { transform: translateY(-6px) rotate(5deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+@keyframes textJiggle {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  30% { transform: translateY(-3px) rotate(-3deg); }
+  60% { transform: translateY(1px) rotate(3deg); }
+}
+@keyframes jokerPop {
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-12px) scale(1.16) rotate(-4deg); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes jokerJackpot {
+  0% { transform: rotateY(0) scale(1); }
+  50% { transform: rotateY(360deg) scale(1.28); }
+  100% { transform: rotateY(720deg) scale(1); }
+}
+@keyframes partyHue {
+  0% { filter: hue-rotate(0deg) saturate(1.25); }
+  100% { filter: hue-rotate(360deg) saturate(1.25); }
+}
+@keyframes sparkFloat {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0); }
+  25% { opacity: 1; transform: translate(-50%, -85%) scale(1.1) rotate(20deg); }
+  100% { opacity: 0; transform: translate(-50%, -155%) scale(0.9) rotate(45deg); }
+}
+@keyframes rippleOut {
+  0% { opacity: 0.8; width: 8px; height: 8px; }
+  100% { opacity: 0; width: 72px; height: 72px; }
+}
+@keyframes coinArc {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -190px) scale(1) rotate(220deg); }
 }
 
 /* ======================= RESPONSIVE =================================== */
@@ -1476,7 +1718,13 @@ body.crt-off .crt-overlay {
   .hc-inner,
   .joker,
   .logo-chip,
-  .landing-title .t-word {
+  .landing-title .t-word,
+  .crt-grain,
+  .crt-scanbar,
+  .crt-static,
+  .table::before,
+  .table::after,
+  body.party .table {
     animation: none !important;
   }
 }

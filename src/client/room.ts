@@ -8,7 +8,7 @@ import {
   DECK_BY_ID,
   SUIT_GLYPH,
 } from "@shared/protocol";
-import { clear, el, mount, wait } from "./dom";
+import { clear, el, mount, rand, wait } from "./dom";
 import { Net } from "./net";
 import { getCrtOn, getName, setCrtOn, setName } from "./store";
 import { COLOR_HEX, createCardBack, createCardFace, fanSlot } from "./cards";
@@ -16,13 +16,19 @@ import { spriteEl } from "./pixelart";
 import {
   isSoundOn,
   playClear,
+  playCoin,
   playCombo,
   playDeal,
   playFanfare,
   playFlip,
+  playGlitch,
   playHover,
+  playJackpot,
+  playPowerup,
   playReveal,
   playSelect,
+  playShuffle,
+  playSparkle,
   toggleSound,
   unlockAudio,
 } from "./sound";
@@ -57,6 +63,11 @@ export class RoomView {
   private myColor: Color | null = null;
   private handBuilt = false;
   private revealing = false;
+  private jokerEls: HTMLElement[] = [];
+  private activatedJokers = new Set<number>();
+  private partyTimer = 0;
+  private konami: string[] = [];
+  private onKeydown = (e: KeyboardEvent) => this.handleKonami(e);
 
   // element refs (assigned in build)
   private idName!: HTMLElement;
@@ -77,6 +88,7 @@ export class RoomView {
   private seatsEl!: HTMLElement;
   private handEl!: HTMLElement;
   private tableEl!: HTMLElement;
+  private deckEl!: HTMLElement;
   private connDot!: HTMLElement;
 
   constructor(root: HTMLElement, code: string) {
@@ -90,16 +102,30 @@ export class RoomView {
     });
     this.net.connect();
     unlockAudio();
+    document.addEventListener("keydown", this.onKeydown);
   }
 
   destroy(): void {
     this.net.close();
+    document.removeEventListener("keydown", this.onKeydown);
+    if (this.partyTimer) clearTimeout(this.partyTimer);
+    document.body.classList.remove("party");
   }
 
   // -------------------------------------------------------------------------
   private build(): void {
     // ---- Sidebar ----
-    this.idToken = el("div", { class: "id-token", text: "★" });
+    this.idToken = el("div", {
+      class: "id-token",
+      text: "★",
+      title: "Give it a flick",
+      on: {
+        click: (e) => {
+          e.stopPropagation();
+          this.tokenEasterEgg();
+        },
+      },
+    });
     this.idName = el("div", { class: "id-name", text: getName() });
     this.idSub = el("div", { class: "id-sub", text: "tap to rename" });
     const identity = el(
@@ -110,7 +136,7 @@ export class RoomView {
         on: { click: () => this.editName() },
       },
       [
-        el("div", { class: "blind-header", text: "Big Blind" }),
+        el("div", { class: "blind-header jiggly", text: "Big Blind" }),
         el("div", { class: "blind-body" }, [
           this.idToken,
           el("div", { class: "id-meta" }, [
@@ -124,14 +150,19 @@ export class RoomView {
 
     this.scoreValue = el("div", { class: "score-value", text: "0" });
     const scorePanel = el("div", { class: "panel score-panel" }, [
-      el("div", { class: "score-label", text: "Story\nPoint" }),
+      el("div", { class: "score-label jiggly", text: "Story\nPoint" }),
       el("div", { class: "score-figure" }, [
-        el("span", { class: "chip-star", text: "✳" }),
+        el("span", {
+          class: "chip-star",
+          text: "✳",
+          title: "Poke the chip",
+          on: { click: (e) => this.sparkleBurst(e.currentTarget as HTMLElement) },
+        }),
         this.scoreValue,
       ]),
     ]);
 
-    this.hpName = el("div", { class: "hp-name", text: "Waiting…" });
+    this.hpName = el("div", { class: "hp-name jiggly", text: "Waiting…" });
     this.hpChips = el("div", { class: "hp-chips", text: "—" });
     this.hpMult = el("div", { class: "hp-mult", text: "—" });
     this.hpPanel = el("div", { class: "panel hand-panel dim" }, [
@@ -180,8 +211,17 @@ export class RoomView {
       }),
     ]);
 
-    this.potValue = el("div", { class: "money", text: "$0" });
-    this.roundValue = el("div", { class: "round-num", text: "1" });
+    this.potValue = el("div", {
+      class: "money",
+      text: "$0",
+      title: "Ka-ching",
+      on: { click: (e) => this.coinBurst(e.currentTarget as HTMLElement) },
+    });
+    this.roundValue = el("div", {
+      class: "round-num",
+      text: "1",
+      on: { click: (e) => this.sparkleBurst(e.currentTarget as HTMLElement) },
+    });
     const bottomRow = el("div", { class: "bottom-row" }, [
       this.potValue,
       el("div", { class: "ante-box" }, [
@@ -218,20 +258,30 @@ export class RoomView {
     this.banner = el("div", { class: "phase-banner" });
     this.seatsEl = el("div", { class: "seats" });
     this.handEl = el("div", { class: "hand locked" });
-    const deck = el("div", { class: "deck", title: "The deck" }, [
-      el("div", { class: "deck-card d3" }),
-      el("div", { class: "deck-card d2" }),
-      el("div", { class: "deck-card d1" }),
-      el("div", { class: "deck-count", text: "∞" }),
-    ]);
+    const deck = el(
+      "div",
+      {
+        class: "deck",
+        title: "Give it a shuffle",
+        on: { click: () => this.riffleDeck() },
+      },
+      [
+        el("div", { class: "deck-card d3" }),
+        el("div", { class: "deck-card d2" }),
+        el("div", { class: "deck-card d1" }),
+        el("div", { class: "deck-count", text: "∞" }),
+      ],
+    );
+    this.deckEl = deck;
 
-    this.tableEl = el("main", { class: "table" }, [
-      jokerRow,
-      this.banner,
-      this.seatsEl,
-      deck,
-      this.handEl,
-    ]);
+    this.tableEl = el(
+      "main",
+      {
+        class: "table",
+        on: { pointerdown: (e) => this.feltClick(e as PointerEvent) },
+      },
+      [jokerRow, this.banner, this.seatsEl, deck, this.handEl],
+    );
 
     mount(this.root, el("div", { class: "room" }, [sidebar, this.tableEl]));
   }
@@ -241,15 +291,21 @@ export class RoomView {
       el("div", { class: "joker-tip-name", text: j.name }),
       el("div", { class: "joker-tip-desc", text: j.desc }),
     ]);
-    return el(
+    const node = el(
       "div",
       {
         class: "joker",
+        title: "Click all five…",
         style: { animationDelay: `${i * 0.3}s` } as Partial<CSSStyleDeclaration>,
-        on: { pointerenter: () => isSoundOn() && playHover() },
+        on: {
+          pointerenter: () => isSoundOn() && playHover(),
+          click: () => this.activateJoker(i),
+        },
       },
       [el("div", { class: "joker-art" }, [spriteEl(j.sprite, j.pal)]), tip],
     );
+    this.jokerEls[i] = node;
+    return node;
   }
 
   // -------------------------------------------------------------------------
@@ -760,6 +816,197 @@ export class RoomView {
     }
   }
 
+  // ---- Easter eggs & interactions ----------------------------------------
+  private centerOf(node: HTMLElement): { x: number; y: number } {
+    const r = node.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+
+  private spawnSpark(x: number, y: number, glyph: string): void {
+    const s = el("div", { class: "spark", text: glyph });
+    s.style.left = `${x}px`;
+    s.style.top = `${y}px`;
+    s.style.color = rand(["#ffd23c", "#6ab6f5", "#58c07a", "#fe5f55", "#ffffff"]);
+    document.body.append(s);
+    setTimeout(() => s.remove(), 900);
+  }
+
+  private spawnRipple(x: number, y: number): void {
+    const r = el("div", { class: "ripple" });
+    r.style.left = `${x}px`;
+    r.style.top = `${y}px`;
+    document.body.append(r);
+    setTimeout(() => r.remove(), 650);
+  }
+
+  private sparkleBurst(node: HTMLElement): void {
+    const { x, y } = this.centerOf(node);
+    for (let i = 0; i < 6; i++) {
+      this.spawnSpark(
+        x + (Math.random() - 0.5) * 30,
+        y + (Math.random() - 0.5) * 20,
+        rand(["✦", "✳", "★"]),
+      );
+    }
+    if (isSoundOn()) playSparkle();
+  }
+
+  private coinBurst(node: HTMLElement): void {
+    const { x, y } = this.centerOf(node);
+    for (let i = 0; i < 5; i++) {
+      const c = el("div", { class: "coin" });
+      c.style.left = `${x + (Math.random() - 0.5) * 34}px`;
+      c.style.top = `${y}px`;
+      c.style.animationDelay = `${i * 0.05}s`;
+      document.body.append(c);
+      setTimeout(() => c.remove(), 1000);
+    }
+    if (isSoundOn()) playCoin();
+  }
+
+  private feltClick(e: PointerEvent): void {
+    if (e.target !== this.tableEl && e.target !== this.seatsEl) return;
+    unlockAudio();
+    this.spawnRipple(e.clientX, e.clientY);
+    this.spawnSpark(e.clientX, e.clientY, rand(["♠", "♥", "♣", "♦"]));
+    if (isSoundOn()) playSparkle();
+  }
+
+  private tokenEasterEgg(): void {
+    this.idToken.animate(
+      [
+        { transform: "rotateY(0) scale(1)" },
+        { transform: "rotateY(360deg) scale(1.25)" },
+        { transform: "rotateY(720deg) scale(1)" },
+      ],
+      { duration: 700, easing: "cubic-bezier(.2,.8,.3,1)" },
+    );
+    if (isSoundOn()) playCoin();
+    const fortunes = [
+      "The cards favor you ♦",
+      "Trust the estimate ♠",
+      "Beware the boss blind ♣",
+      "A joker walks among us ♥",
+      "Story points are a construct",
+      "Ship it. Ship it now.",
+      "Small blind, big dreams",
+      "This one's a 13, I feel it",
+    ];
+    this.idSub.textContent = rand(fortunes);
+    setTimeout(() => this.refreshIdSub(), 2200);
+  }
+
+  private refreshIdSub(): void {
+    const me = this.snapshot?.participants.find((p) => p.isYou);
+    if (me) this.idSub.textContent = `${me.color} ${me.suit} • tap to rename`;
+  }
+
+  private riffleDeck(): void {
+    unlockAudio();
+    this.deckEl.classList.remove("shuffling");
+    void this.deckEl.offsetWidth;
+    this.deckEl.classList.add("shuffling");
+    setTimeout(() => this.deckEl.classList.remove("shuffling"), 520);
+    const { x, y } = this.centerOf(this.deckEl);
+    for (let i = 0; i < 6; i++) {
+      const c = el("div", { class: "riffle-card" });
+      document.body.append(c);
+      const dx = (Math.random() - 0.5) * 170;
+      const dy = -40 - Math.random() * 90;
+      c.animate(
+        [
+          { transform: `translate(${x}px, ${y}px) rotate(0deg)`, opacity: 1 },
+          {
+            transform: `translate(${x + dx}px, ${y + dy}px) rotate(${dx}deg)`,
+            opacity: 1,
+            offset: 0.5,
+          },
+          { transform: `translate(${x}px, ${y}px) rotate(0deg)`, opacity: 0.85 },
+        ],
+        { duration: 480, easing: "ease", delay: i * 30 },
+      );
+      setTimeout(() => c.remove(), 560 + i * 30);
+    }
+    if (isSoundOn()) playShuffle();
+  }
+
+  private activateJoker(i: number): void {
+    unlockAudio();
+    const node = this.jokerEls[i];
+    if (!node) return;
+    node.classList.remove("pop");
+    void node.offsetWidth;
+    node.classList.add("pop");
+    if (this.activatedJokers.has(i)) {
+      if (isSoundOn()) playSparkle();
+      return;
+    }
+    this.activatedJokers.add(i);
+    node.classList.add("activated");
+    if (isSoundOn()) playPowerup(this.activatedJokers.size - 1);
+    if (this.activatedJokers.size >= this.jokerEls.length && this.jokerEls.length > 0) {
+      setTimeout(() => this.jokerJackpot(), 260);
+    }
+  }
+
+  private jokerJackpot(): void {
+    this.jokerEls.forEach((n, idx) => {
+      setTimeout(() => {
+        n.classList.remove("jackpot");
+        void n.offsetWidth;
+        n.classList.add("jackpot");
+        setTimeout(() => n.classList.remove("jackpot"), 900);
+      }, idx * 80);
+    });
+    const banner = el("div", { class: "wild-banner" }, [
+      el("div", { class: "wild-title", text: "JOKERS WILD!" }),
+      el("div", { class: "wild-sub", text: "You found the full house of jokers ★" }),
+    ]);
+    this.tableEl.append(banner);
+    setTimeout(() => banner.remove(), 2600);
+    this.confetti();
+    this.shake(4);
+    if (isSoundOn()) playJackpot();
+    setTimeout(() => {
+      this.activatedJokers.clear();
+      this.jokerEls.forEach((n) => n.classList.remove("activated"));
+    }, 1400);
+  }
+
+  private handleKonami(e: KeyboardEvent): void {
+    // ignore while typing in an input (e.g. renaming)
+    if (e.target instanceof HTMLInputElement) return;
+    const seq = [
+      "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
+      "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a",
+    ];
+    this.konami.push(e.key.length === 1 ? e.key.toLowerCase() : e.key);
+    if (this.konami.length > seq.length) this.konami.shift();
+    if (
+      this.konami.length === seq.length &&
+      this.konami.every((k, idx) => k === seq[idx])
+    ) {
+      this.konami = [];
+      this.partyMode();
+    }
+  }
+
+  private partyMode(): void {
+    document.body.classList.add("party", "glitching");
+    setTimeout(() => document.body.classList.remove("glitching"), 500);
+    this.toast("★ JOKERS WILD MODE ★");
+    this.confetti();
+    if (isSoundOn()) {
+      playGlitch();
+      playJackpot();
+    }
+    if (this.partyTimer) clearTimeout(this.partyTimer);
+    this.partyTimer = window.setTimeout(() => {
+      document.body.classList.remove("party");
+      this.partyTimer = 0;
+    }, 12000);
+  }
+
   // ---- Modals / misc ------------------------------------------------------
   private editName(): void {
     const me = this.snapshot?.participants.find((p) => p.isYou);
@@ -860,6 +1107,7 @@ export class RoomView {
         el("li", { html: "Hit <b>Clear Cards</b> to start the next round." }),
       ]),
       el("div", { class: "howto-foot", text: "Anyone can reveal or clear. Share the room code to invite others." }),
+      el("div", { class: "howto-foot", html: "psst — the table is <b>alive</b>. Poke the jokers, the chip, the deck… and there's a very old cheat code. ✦" }),
     ]);
   }
 
